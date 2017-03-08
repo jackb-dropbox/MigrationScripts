@@ -2,8 +2,9 @@
 # Use referenced Box.V21.dll (rebuild as standard .NET class library)
 # Uses Box .NET SDK, standard .NET library included
 # Update the script location below as well as the clientid, secret, redirecturi and developer token from Box developer account
+# Output files will be located in "<ScriptLocation>\CSVFiles\yyyy-MM-dd HH.mm.ss.csv"
 # Author: jackb@dropbox.com
-# Date: 1/27/2017
+# Updated: 3/8/2017
 
 using namespace Box.V2
 using namespace Box.V2.Auth
@@ -11,6 +12,7 @@ using namespace Box.V2.Config
 using namespace Box.V2.Converter
 using namespace Box.V2.Exceptions
 using namespace Box.V2.Managers
+using namespace Box.V2.Models
 using namespace Box.V2.Plugins
 using namespace Box.V2.Request
 using namespace Box.V2.Services
@@ -31,7 +33,8 @@ $token = "DEVELOPER TOKEN"
 #Variables to NOT change
 ########################
 $scriptName = "Box Export Users Script"
-$userIdFile =  $ScriptLocation + "CSVFiles\userIds.csv"
+$docTitle =  "{0:yyyy-MM-dd HH.mm.ss}" -f (Get-Date)                                                                                    
+$userIdFile =  $ScriptLocation + "CSVFiles\userIds" + $docTitle + ".csv"
 $logfile = $ScriptLocation + "Logs\scriptlog.txt"
 $refreshToken = "anything"
 $expiresIn = 3600
@@ -76,27 +79,78 @@ function ExportUsers()
 {
         GetLogger "Getting enterprise users from Box..." $true
 
-        #create userId CSV file and write out headers
-        $createCsvFile = New-Item $userIdFile -type file -force
-        [void] $createCsvFile
-        $outstring = "Login,Id"
-        $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
-
-        #create Box client
-        $config = New-Object BoxConfig($clientId, $clientSecret, $redirectUri)
-        $session = New-Object OAuthSession($token, $refreshToken, $expiresIn, "bearer")  
-        $client = New-Object BoxClient($config, $session)
-
-        #get enterprise users and write to CSV file
-        $entItems = $client.UsersManager.GetEnterpriseUsersAsync().Result
-        $users = $entItems.Entries
-        foreach ($user in $users)
-        {   
-            $id = $user.Id
-            $login = $user.Login
-            $outstring = "$login,$id"
+        Try
+        {
+            #create userId CSV file and write out headers
+            $createCsvFile = New-Item $userIdFile -type file -force
+            [void] $createCsvFile
+            $outstring = "Login,Id"
             $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
-            $count++
+
+            #create Box client
+            $config = New-Object BoxConfig($clientId, $clientSecret, $redirectUri)
+            $session = New-Object OAuthSession($token, $refreshToken, $expiresIn, "bearer")  
+            $client = New-Object BoxClient($config, $session)
+
+            #get enterprise users and write to CSV file
+            #Make sure we loop through all using offset and limit
+            $offset = 0
+            $limit = 1000
+
+            $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+            $users = $entItems.Entries
+            foreach ($user in $users)
+            {   
+                $id = $user.Id
+                $login = $user.Login
+                $outstring = "$login,$id"
+                $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
+                $count++
+            }
+
+            $offset = $offset + $limit
+            $entCount = $entItems.TotalCount
+            if ($entCount -ge $offset)
+            {
+                $pageBool = $true
+            }
+            if ($entCount -lt $offset)
+            {
+                $pageBool = $false
+            }
+            while ($pageBool)
+            {
+                $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+                $users = $entItems.Entries
+                foreach ($user in $users)
+                {   
+                    $id = $user.Id
+                    $login = $user.Login
+                    $outstring = "$login,$id"
+                    $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
+                    $count++
+                }
+                $entCount = $entItems.TotalCount
+                $offset = $offset + $limit
+                if ($entCount -ge $offset)
+                {
+                    $pageBool = $true
+                }
+                if ($entCount -lt $offset)
+                {
+                    $pageBool = $false
+                }
+            }
+        }
+        Catch [BoxException]
+        {
+            $errorMessage = $_.Message
+            GetLogger "***Box Exception: [$errorMessage]***" $true
+        }
+        Catch
+        {
+            $errorMessage = $_.Exception.Message
+            GetLogger "***Exception: [$errorMessage]***" $true
         }
         GetLogger "User export completed. Total User's dumped: $count" $true        
 }

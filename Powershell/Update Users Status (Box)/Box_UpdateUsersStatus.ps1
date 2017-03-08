@@ -108,8 +108,12 @@ function ChangeUserStatus()
             #import exclusion list
             $exclusions = Import-Csv $exclusionFile
         
-            #get enterprise users
-            $entItems = $client.UsersManager.GetEnterpriseUsersAsync().Result
+            #get enterprise users and write to CSV file
+            #Make sure we loop through all using offset and limit
+            $offset = 0
+            $limit = 1000
+
+            $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
             $users = $entItems.Entries
 
             #set each user to read-only not in exclusions list
@@ -132,6 +136,53 @@ function ChangeUserStatus()
                     $statusCount++
                 }
                 $count++
+            }
+            $offset = $offset + $limit
+            $entCount = $entItems.TotalCount
+            if ($entCount -ge $offset)
+            {
+                $pageBool = $true
+            }
+            if ($entCount -lt $offset)
+            {
+                $pageBool = $false
+            }
+            while ($pageBool)
+            {
+                $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+                $users = $entItems.Entries
+                foreach ($user in $users)
+                {   
+                    $id = $user.Id
+                    $login = $user.Login
+                    
+                    $exclude = $exclusions | Where-Object {$_.Login -eq $login}
+            
+                    #not excluded
+                    if ($exclude -eq $null)
+                    {
+                        #set to read-only
+                        $userRequest = New-Object BoxUserRequest
+                        $userRequest.Id = $id
+                        $userRequest.Status = $statusChoice
+                
+                        $user = $client.UsersManager.UpdateUserInformationAsync($userRequest).Result
+                        $statusCount++
+                    }
+                    $count++
+
+                    $entCount = $entItems.TotalCount
+                    $offset = $offset + $limit
+
+                    if ($entCount -ge $offset)
+                    {
+                        $pageBool = $true
+                    }
+                    if ($entCount -lt $offset)
+                    {
+                        $pageBool = $false
+                    }
+                }
             }
         }
         Catch [BoxException]
