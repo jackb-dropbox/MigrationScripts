@@ -1,4 +1,4 @@
-# MigrationScripts
+# Migration Scripts
 Public repository to store all migration related scripts
 
 **Powershell scripts require Powershell 5.0 (included on Windows 10). If your system doesn't have this version you can easily update it at:
