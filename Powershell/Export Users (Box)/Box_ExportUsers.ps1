@@ -1,10 +1,10 @@
 # Exports enterprise users from Box into csv format file. Can be used to import for other scripts here
 # Use referenced Box.V21.dll (rebuild as standard .NET class library)
 # Uses Box .NET SDK, standard .NET library included
-# Update the script location below as well as the clientid, secret, redirecturi and developer token from Box developer account
+# Update the script location below as well as the userType, clientid, secret, redirecturi and developer token from Box developer account
 # Output files will be located in "<ScriptLocation>\CSVFiles\yyyy-MM-dd HH.mm.ss.csv"
 # Author: jackb@dropbox.com
-# Updated: 3/8/2017
+# Updated: 3/21/2017
 
 using namespace Box.V2
 using namespace Box.V2.Auth
@@ -21,6 +21,10 @@ using namespace Nito.AsyncEx
 ####################
 #Variables to update
 ####################
+
+#Valid values are all, external or managed
+$userType = "managed"
+
 $ScriptLocation = “C:\Scripts\"
 $clientId = "CLIENT ID"
 $clientSecret = "CLIENT SECRET"
@@ -47,7 +51,6 @@ $count = 0
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Nito.AsyncEx.Enlightenment.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\System.Net.Http.Extensions.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\System.Net.Http.Primitives.dll”)
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\bouncy_castle_hmac_sha_pcl.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Box.V21.dll”)
 
@@ -77,7 +80,7 @@ function GetLogger($log, [bool]$output)
 
 function ExportUsers()
 {
-        GetLogger "Getting enterprise users from Box..." $true
+        GetLogger "Getting enterprise users from Box ($userType users)..." $true
 
         Try
         {
@@ -97,7 +100,7 @@ function ExportUsers()
             $offset = 0
             $limit = 1000
 
-            $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+            $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit, $null, $userType, $false).Result
             $users = $entItems.Entries
             foreach ($user in $users)
             {   
@@ -120,7 +123,7 @@ function ExportUsers()
             }
             while ($pageBool)
             {
-                $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+                $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit, $null, $userType, $false).Result
                 $users = $entItems.Entries
                 foreach ($user in $users)
                 {   
