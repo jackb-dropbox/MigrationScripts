@@ -1,9 +1,9 @@
 # Sets enterprise users from Box to Read-Only, Active or Inactive. Uses exclusion list to ignore any users if needed
 # Use referenced Box.V21.dll (rebuild as standard .NET class library)
 # Uses Box .NET SDK, standard .NET library included
-# Update the variables below: script location, status, clientid, secret, redirecturi and developer token from Box developer account
+# Update the variables below: script location, userType, status, clientid, secret, redirecturi and developer token from Box developer account
 # Author: jackb@dropbox.com
-# Date: 1/31/2017
+# Date: 3/21/2017
 
 using namespace Box.V2
 using namespace Box.V2.Auth
@@ -21,7 +21,11 @@ using namespace Nito.AsyncEx
 #Variables to update
 ####################
 #change to ReadOnly, Active, or Inactive
-$status = "Active"
+$status = "ReadOnly"
+
+#Valid values are all, external or managed
+$userType = "managed"
+
 $ScriptLocation = “C:\Scripts\"
 $clientId = "CLIENT ID"
 $clientSecret = "CLIENT SECRET"
@@ -33,7 +37,6 @@ $token = "DEVELOPER TOKEN"
 ########################
 #Variables to NOT change
 ########################
-
 $scriptName = "Update Box Enterprise Users Status Script"
 $exclusionFile =  $ScriptLocation + "CSVFiles\exclusions.csv"
 $logfile = $ScriptLocation + "Logs\scriptlog.txt"
@@ -52,7 +55,6 @@ $readOnlyStatus = "cannot_delete_edit_upload"
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Nito.AsyncEx.Enlightenment.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\System.Net.Http.Extensions.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\System.Net.Http.Primitives.dll”)
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\bouncy_castle_hmac_sha_pcl.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll”)
 [void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Box.V21.dll”)
 
@@ -82,7 +84,7 @@ function GetLogger($log, [bool]$output)
 
 function ChangeUserStatus()
 {
-        GetLogger "Getting enterprise users from Box..." $true
+        GetLogger "Getting enterprise users from Box ($userType users)..." $true
 
         Try
         {
@@ -113,7 +115,7 @@ function ChangeUserStatus()
             $offset = 0
             $limit = 1000
 
-            $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+            $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit, $null, $userType, $false).Result
             $users = $entItems.Entries
 
             #set each user to read-only not in exclusions list
@@ -149,7 +151,7 @@ function ChangeUserStatus()
             }
             while ($pageBool)
             {
-                $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit).Result
+                $entItems = $client.UsersManager.GetEnterpriseUsersAsync("", $offset, $limit, $null, $userType, $false).Result
                 $users = $entItems.Entries
                 foreach ($user in $users)
                 {   
