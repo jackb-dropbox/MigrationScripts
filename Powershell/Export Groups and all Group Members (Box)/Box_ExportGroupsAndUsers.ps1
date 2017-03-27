@@ -269,7 +269,8 @@ function ExportGroupsAndMembers()
                         {
                             $gPageBool = $false
                         }
-                    }                                            
+                    }
+                    GetLogger "Box Group [$name] exported successfully. Total members: [$membercount]" $true                                            
                  }
                  $offset = $offset + $limit
                  $groupCount = $groupMembersResult.TotalCount
@@ -280,10 +281,8 @@ function ExportGroupsAndMembers()
                  if ($groupCount -lt $offset)
                  {
                      $pageBool = $false
-                 }
-                 GetLogger "Box Group [$name] exported successfully. Total members: [$membercount]" $true              
-            }
-            GetLogger "Box Groups export completed. Total groups: [$count]" $true  
+                 }          
+            } 
         }
         Catch [BoxException]
         {
