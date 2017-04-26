@@ -1,10 +1,10 @@
-# Exports enterprise users from Box into csv format file. Can be used to import for other scripts here
+# Exports enterprise users from Box into csv format file. Can be used to import for other scripts here (or Admin Toolkit to provision new users)
 # Use referenced Box.V21.dll (rebuild as standard .NET class library)
 # Uses Box .NET SDK, standard .NET library included
 # Update the script location below as well as the userType, clientid, secret, redirecturi and developer token from Box developer account
 # Output files will be located in "<ScriptLocation>\CSVFiles\yyyy-MM-dd HH.mm.ss.csv"
 # Author: jackb@dropbox.com
-# Updated: 3/21/2017
+# Updated: 4/25/2017
 
 using namespace Box.V2
 using namespace Box.V2.Auth
@@ -38,7 +38,7 @@ $token = "DEVELOPER TOKEN"
 ########################
 $scriptName = "Box Export Users Script"
 $docTitle =  "{0:yyyy-MM-dd HH.mm.ss}" -f (Get-Date)                                                                                    
-$userIdFile =  $ScriptLocation + "CSVFiles\userIds" + $docTitle + ".csv"
+$userIdFile =  $ScriptLocation + "CSVFiles\users" + $docTitle + ".csv"
 $logfile = $ScriptLocation + "Logs\scriptlog.txt"
 $refreshToken = "anything"
 $expiresIn = 3600
@@ -87,7 +87,7 @@ function ExportUsers()
             #create userId CSV file and write out headers
             $createCsvFile = New-Item $userIdFile -type file -force
             [void] $createCsvFile
-            $outstring = "Login,Id"
+            $outstring = "Login,FirstName,LastName,Id"
             $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
 
             #create Box client
@@ -106,7 +106,11 @@ function ExportUsers()
             {   
                 $id = $user.Id
                 $login = $user.Login
-                $outstring = "$login,$id"
+                $name = $user.Name
+                $nameSplit = $name -split "\s+"
+                $firstName = $nameSplit[0]
+                $lastName = $nameSplit[1]
+                $outstring = "$login,$firstName,$lastName,$id"
                 $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
                 $count++
             }
@@ -129,7 +133,11 @@ function ExportUsers()
                 {   
                     $id = $user.Id
                     $login = $user.Login
-                    $outstring = "$login,$id"
+                    $name = $user.Name
+                    $nameSplit = $name -split "\s+"
+                    $firstName = $nameSplit[0]
+                    $lastName = $nameSplit[1]
+                    $outstring = "$login,$firstName,$lastName,$id"
                     $outstring | Out-File -FilePath $userIdFile -Encoding utf8 -Append
                     $count++
                 }
@@ -155,7 +163,7 @@ function ExportUsers()
             $errorMessage = $_.Exception.Message
             GetLogger "***Exception: [$errorMessage]***" $true
         }
-        GetLogger "User export completed. Total User's dumped: $count" $true        
+        GetLogger "User export completed. Total User's exported: $count" $true        
 }
 
 ####################
