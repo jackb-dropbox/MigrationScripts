@@ -1,10 +1,10 @@
-﻿# Creates Group members import script for Dropbox from Box exported group member script.
-# Group members script: Outputs 3 columns - groupname, groupid, memberemail for each group member.
-# When complete, script is ready to be imported to Admin Toolkit, running group script first, then the group member script
+﻿# Creates Group members import scripts for Dropbox from Box exported group member script.
+# Group members script: Outputs 3 columns, groupname, groupid, memberemail for each group emember.
+# when complete, script is ready to be imported to Admin Toolkit, running groups script first, then the group member script
 
 # Variables to change
 # ===================
-# Change $boxGroupMemberScript path to the CSV file you exported from Box, and add your Dropbox Team Member Management token.
+# Change $boxGroupScript path to the CSV file you exported from Box, and add your Dropbox team access token
 
 # Uses Dropbox .NET SDK, standard .NET library included
 # Update the script location below as well as the token
@@ -12,15 +12,15 @@
 # https://www.microsoft.com/en-us/download/details.aspx?id=50395
 
 # Author: jackb@dropbox.com
-# Date: 4/20/2017
+# Date: 3/30/2017
 
 using namespace Dropbox.Api
 
 ####################
 #Variables to update
 ####################
-$ScriptLocation = “C:\Scripts\"
-$boxGroupMemberScript = "C:\Scripts\Box\CSVFiles\boxGroups-2017-datetime.csv"
+$ScriptLocation = "C:\Scripts\Powershell\Dropbox\Migration\"
+$boxGroupMemberScript = "C:\Scripts\Powershell\Box\CSVFiles\boxGroups-2017-04-18 06.05.21.csv"
 
 #Needs provision token to complete
 $token = "ENTER TEAM MEMBER MANAGEMENT TOKEN HERE"
@@ -30,13 +30,13 @@ $token = "ENTER TEAM MEMBER MANAGEMENT TOKEN HERE"
 ########################
 $scriptName = "Create Group Members Import Script for Dropbox Admin Toolkit"
 $docTitle =  "{0:yyyy-MM-dd HH.mm.ss}" -f (Get-Date)
-$userManaged = "user_managed"
+
 $logfile = $ScriptLocation + "Logs\scriptlog.txt"
 $dropboxGroupMemberScript = $ScriptLocation + "CSVFiles\DropboxGroupMembersImport-" + $docTitle + ".csv"
 $count = 0
 
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll”)
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll”)
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll")
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll")
 
 ##################
 #Script Functions
@@ -75,7 +75,7 @@ try
     #create our client to use
     $client = New-Object DropboxTeamClient($token)
 
-    GetLogger "Creating CSV file and headers for Group Members script..." $true
+    GetLogger "Creating CSV file and headers for Group Member script..." $true
 
     #create CSV file first for group member script
     $createCsvFile = New-Item $dropboxGroupMemberScript -type file -force
