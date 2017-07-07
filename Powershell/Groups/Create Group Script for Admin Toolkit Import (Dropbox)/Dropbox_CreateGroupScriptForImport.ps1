@@ -1,10 +1,9 @@
-# Creates Groups import script for Dropbox Admin Toolkit from Box exported group member script.
-# Groups script: Outputs 2 columns - Group name and "user_managed". If company_managed will have to be changed manually or in CSV file.
-# This script must be run and imported into the Admin Toolkit before you run the Group Member script for Admin # Toolkit (also included on Migration Scripts site).
+# Creates Groups import scripts for Dropbox from Box exported group member script.
+# Group script: Outputs 2 columns, group name and "user_managed". If company_managed will have to be changed manually
 
 # Variables to change
 # ===================
-# Change $boxGroupMemberScript path to the CSV file you exported from Box, and add your Dropbox team access token
+# Change $boxGroupScript path to the CSV file you exported from Box, and add your Dropbox team access token
 
 # Uses Dropbox .NET SDK, standard .NET library included
 # Update the script location below as well as the token
@@ -12,15 +11,15 @@
 # https://www.microsoft.com/en-us/download/details.aspx?id=50395
 
 # Author: jackb@dropbox.com
-# Date: 4/20/2017
+# Date: 3/30/2017
 
 using namespace Dropbox.Api
 
 ####################
 #Variables to update
 ####################
-$ScriptLocation = “C:\Scripts\"
-$boxGroupMemberScript = "C:\Scripts\Box\CSVFiles\boxGroups-2017-datetime.csv"
+$ScriptLocation = "C:\Scripts\"
+$boxGroupMemberScript = "C:\Scripts\CSVFiles\boxGroups-date.csv"
 
 ########################
 #Variables to NOT change
@@ -33,8 +32,8 @@ $logfile = $ScriptLocation + "Logs\scriptlog.txt"
 $dropboxGroupScript = $ScriptLocation + "CSVFiles\DropboxGroupsImport-" + $docTitle + ".csv"
 $count = 0
 
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll”)
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll”)
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll")
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll")
 
 ##################
 #Script Functions
@@ -65,7 +64,7 @@ GetLogger "-----Parameters: [LogFile]: $logfile [Script Location]: $ScriptLocati
 
 try
 {
-    GetLogger "Creating file for Groups script..." $true
+    GetLogger "Creating file for Group script..." $true
 
     $createCsvFile2 = New-Item $dropboxGroupScript -type file -force
     [void] $createCsvFile2
@@ -93,6 +92,7 @@ catch
 }
 
 GetLogger "Group Output Script Location [$dropboxGroupScript]-----" $true
+GetLogger "Group Member Output Script Location [$dropboxGroupMemberScript]-----" $true
 GetLogger "-----Script completed.-----" $true
 
 

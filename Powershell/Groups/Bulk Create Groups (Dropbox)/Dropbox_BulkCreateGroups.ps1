@@ -20,7 +20,7 @@ using namespace Dropbox.Api
 ####################
 #Variables to update
 ####################
-$ScriptLocation = “C:\Scripts\"
+$ScriptLocation = "C:\Scripts\"
 
 #Needs team member management token to run
 $token = "ENTER TEAM MEMBER MANAGEMENT TOKEN HERE"
@@ -33,8 +33,8 @@ $logfile = $ScriptLocation + "Logs\scriptlog.txt"
 $groupFile = $ScriptLocation + "CSVFiles\groups.csv"
 $count = 0
 
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll”)
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll”)
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll")
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll")
 
 ##################
 #Script Functions

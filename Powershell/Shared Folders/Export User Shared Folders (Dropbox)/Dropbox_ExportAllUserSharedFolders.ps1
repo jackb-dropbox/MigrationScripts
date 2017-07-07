@@ -1,7 +1,4 @@
 # Exports user's (including external collaborators) shared folder permissions from Dropbox into csv format file.
-
-# To use: Update $token with team member file access token
-
 # Uses Dropbox .NET SDK, standard .NET library included
 # Update the script location below as well as the token
 # Author: jackb@dropbox.com
@@ -12,7 +9,7 @@ using namespace Dropbox.Api
 ####################
 #Variables to update
 ####################
-$ScriptLocation = “C:\Scripts\"
+$ScriptLocation = "C:\Scripts\"
 $token = "ENTER TEAM MEMBER FILE ACCESS TOKEN HERE"
 
 ########################
@@ -25,8 +22,8 @@ $memberIdFile = $ScriptLocation + "CSVFiles\UserSharedFolderPermissions-" + $doc
 $external = "External Collaborator"
 $count = 0
 
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll”)
-[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll”)
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Dropbox.Api.dll")
+[void][Reflection.Assembly]::LoadFile($ScriptLocation + "Dlls\Newtonsoft.Json.dll")
 
 ##################
 #Script Functions
